@@ -978,7 +978,24 @@ $app->post('/guardar/avance', function()  use($app, $db) {
 	});	
 	
 
+//Lista de Módulos by Usuario
+	$app->get('/lstModulosByUsuarioCampana/:id', function($id)    use($app, $db) {
+		$usrActual = $_SESSION["idUsuario"];		
+		$sql="SELECT distinct  m.idModulo, m.nombre, m.icono, m.panel, m.liga " .
+		"FROM sia_rolesModulos rm " .
+		"INNER JOIN sia_modulos m ON rm.idModulo=m.idModulo " .
+		"WHERE rm.idRol in (Select idRol from sia_usuariosRoles Where idUsuario=:usrActual) " . 
+		"ORDER BY m.panel, m.orden ";
 
+		$dbQuery = $db->prepare($sql);		
+		$dbQuery->execute(array(':usrActual' => $usrActual));
+		$result['datos'] = $dbQuery->fetchAll(PDO::FETCH_ASSOC);
+		if(!$result){
+			$app->halt(404, "NO SE ENCONTRARON DATOS ");
+		}else{			
+			echo json_encode($result);
+		}	
+	});	
 		
 
 	$app->run();
